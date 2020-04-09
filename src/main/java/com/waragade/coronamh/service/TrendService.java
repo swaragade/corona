@@ -141,7 +141,9 @@ public class TrendService {
 			 */
 			
 		}
-		return cases;
+		JSONObject error = new JSONObject();
+		error.put("Error", "State not found");
+		return error.toString();
 	}
 
 }

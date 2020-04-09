@@ -26,32 +26,39 @@ public class GlobalService {
 	public String globalData() {
 
 		String response1 = globalClient.getTrend();
-		JSONObject responseJson1 = new JSONObject(response1);
+		if(response1 != null || response1 != "") {
+			JSONObject responseJson1 = new JSONObject(response1);
 
-		System.out.println(responseJson1.get("results").toString());
+			System.out.println(responseJson1.get("results").toString());
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		List<Global> listFromJackson = null;
-		try {
-			listFromJackson = mapper.readValue(responseJson1.get("results").toString(),
-					new TypeReference<ArrayList<Global>>() {
-					});
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			List<Global> listFromJackson = null;
+			try {
+				listFromJackson = mapper.readValue(responseJson1.get("results").toString(),
+						new TypeReference<ArrayList<Global>>() {
+						});
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+
+			JSONObject formDetailsJson = new JSONObject();
+			for (Global t : listFromJackson) {
+
+				formDetailsJson.put("TotalAffectedCountries", t.getTotalAffectedCountries());
+				formDetailsJson.put("TotalCases", t.getTotalCases());
+				formDetailsJson.put("TotalDeaths", t.getTotalDeaths());
+				formDetailsJson.put("TotalRecovered", t.getTotalRecovered());
+
+			}
+
+			return formDetailsJson.toString();
+		}else {
+			JSONObject error = new JSONObject();
+			error.put("Error", "State not found");
+			return error.toString();
 		}
 
-		JSONObject formDetailsJson = new JSONObject();
-		for (Global t : listFromJackson) {
-
-			formDetailsJson.put("TotalAffectedCountries", t.getTotalAffectedCountries());
-			formDetailsJson.put("TotalCases", t.getTotalCases());
-			formDetailsJson.put("TotalDeaths", t.getTotalDeaths());
-			formDetailsJson.put("TotalRecovered", t.getTotalRecovered());
-
-		}
-
-		return formDetailsJson.toString();
 	}
 
 	public String stateData(String stateCode) {
@@ -94,7 +101,9 @@ public class GlobalService {
 
 			return response.toString();
 		}
-		return null;
+		JSONObject error = new JSONObject();
+		error.put("Error", "State not found");
+		return error.toString();
 
 	}
 }

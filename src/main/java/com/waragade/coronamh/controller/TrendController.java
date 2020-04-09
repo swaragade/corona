@@ -17,16 +17,21 @@ public class TrendController {
 
 	@Autowired
 	GlobalService globalService;
-
-	@GetMapping("/trend")
-	public String getTrend() {
-		System.out.println("api called");
-		String result = trendService.mapTrend();
-
-		System.out.println("api result :  " + result);
-
-		return result;
+	
+	@GetMapping("/")
+	public String working() {
+	
+		return "Application UP";
 	}
+
+	/*
+	 * @GetMapping("/trend") public String getTrend() {
+	 * System.out.println("api called"); String result = trendService.mapTrend();
+	 * 
+	 * System.out.println("api result :  " + result);
+	 * 
+	 * return result; }
+	 */
 
 	@GetMapping("/globe")
 	public String getGlobal() {
@@ -41,24 +46,17 @@ public class TrendController {
 	@GetMapping("/india")
 	public String getIndia() {
 		System.out.println("api called");
-		String result = trendService.mapTrend();
-
-		System.out.println("api result :  " + result);
-
-		return result;
+		return trendService.getIndia();
 	}
 
 	@GetMapping("/state/{state_name}")
-	public String getState(@PathVariable(value = "state_name") String stateName) {
+	public String getState(@PathVariable(value = "state_name", required = true) String stateName) {
 		String result = null;
 		if (stateName != null || stateName != "") {
 			result = globalService.stateData(stateName);
-		} else {
-			result = globalService.stateData("Maharashtra");
 		}
-
 		System.out.println("api result :  " + result);
-
+		
 		return result;
 	}
 

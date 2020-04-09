@@ -16,12 +16,12 @@ import com.waragade.coronamh.model.Global;
 
 @Component
 public class GlobalService {
-	/*
-	 * public static void main(String[] args) { stateData(); }
-	 */
 
 	@Autowired
-	static GlobalClient globalClient;
+	GlobalClient globalClient;
+
+	@Autowired
+	TrendService trendService;
 
 	public String globalData() {
 
@@ -54,41 +54,47 @@ public class GlobalService {
 		return formDetailsJson.toString();
 	}
 
-	public static String stateData(String stateName) {
+	public String stateData(String stateCode) {
 
-		String clientResponse = new GlobalClient().getState();
-		JSONObject stateJson = new JSONObject(clientResponse);
-		String stateString = stateJson.get(stateName).toString();
+		String stateName = trendService.getFullName(stateCode);
 
-		JSONObject distJson = new JSONObject(stateString);
-		String distString = distJson.get("districtData").toString();
+		if (stateName != null) {
+			String clientResponse = new GlobalClient().getState();
+			JSONObject stateJson = new JSONObject(clientResponse);
+			String stateString = stateJson.get(stateName).toString();
 
-		JSONObject subDistJson = new JSONObject(distString);
+			JSONObject distJson = new JSONObject(stateString);
+			String distString = distJson.get("districtData").toString();
 
-		Integer sum = 0;
-		List<JSONObject> response = new ArrayList<>();
-		for (String district : subDistJson.keySet()) {
-			System.out.println("keys =>" + district);
-			String subDistString = subDistJson.get(district).toString();
-			JSONObject confirmJson = new JSONObject(subDistString);
-			String confirmString = confirmJson.get("confirmed").toString();
-			JSONObject formDetailsJson = new JSONObject();
-			if ((confirmString != null || confirmString != "") && !district.contains("Gujar")) {
-				Integer cases = Integer.parseInt(confirmString);
-				formDetailsJson.put("District", district);
-				formDetailsJson.put("Cases", cases);
+			JSONObject subDistJson = new JSONObject(distString);
+
+			Integer sum = 0;
+			List<JSONObject> response = new ArrayList<>();
+			for (String district : subDistJson.keySet()) {
+				System.out.println("keys =>" + district);
+				String subDistString = subDistJson.get(district).toString();
+				JSONObject confirmJson = new JSONObject(subDistString);
+				String confirmString = confirmJson.get("confirmed").toString();
+				JSONObject formDetailsJson = new JSONObject();
+				if ((confirmString != null || confirmString != "") && !district.contains("Gujar")) {
+					Integer cases = Integer.parseInt(confirmString);
+					formDetailsJson.put("District", district);
+					formDetailsJson.put("Cases", cases);
+				}
+
+				System.out.println("value : " + confirmString);
+				sum += Integer.parseInt(confirmString);
+				response.add(formDetailsJson);
 			}
+			System.out.println("sum = " + sum);
+			JSONObject state = new JSONObject();
+			state.put("State", stateName);
+			state.put("Cases", sum);
+			response.add(state);
 
-			System.out.println("value : " + confirmString);
-			sum += Integer.parseInt(confirmString);
-			response.add(formDetailsJson);
+			return response.toString();
 		}
-		System.out.println("sum = " + sum);
-		JSONObject state = new JSONObject();
-		state.put("State", stateName);
-		state.put("Cases", sum);
-		response.add(state);
+		return null;
 
-		return response.toString();
 	}
 }
